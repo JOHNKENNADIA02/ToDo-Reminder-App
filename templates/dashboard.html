@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Task Manager{% endblock %}
+
+{% block content %}
+
+<nav class="navbar navbar-expand-lg navbar-light">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="#">Task Manager</a>
+        <div class="d-flex align-items-center">
+            <span class="me-3">Welcome, <strong>{{ username }}</strong></span>
+            <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary btn-sm">Logout</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-5 pb-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <h3 class="mb-4 text-white">Your Tasks</h3>
+            
+            <!-- Add Task Form -->
+            <div class="d-flex mb-3">
+                <a href="{{ url_for('dashboard', filter='all') }}"
+                   class="btn me-2 {% if filter_option == 'all' %}btn-light fw-bold{% else %}btn-outline-light{% endif %}">
+                    All
+                </a>
+            
+                <a href="{{ url_for('dashboard', filter='completed') }}"
+                   class="btn me-2 {% if filter_option == 'completed' %}btn-success fw-bold{% else %}btn-outline-light{% endif %}">
+                    Completed
+                </a>
+            
+                <a href="{{ url_for('dashboard', filter='pending') }}"
+                   class="btn {% if filter_option == 'pending' %}btn-warning fw-bold text-dark{% else %}btn-outline-light{% endif %}">
+                    Pending
+                </a>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Add New Task</h5>
+                    <form method="POST" action="{{ url_for('add_task') }}">
+                        <div class="mb-3">
+                            <input type="text" class="form-control" name="title" placeholder="Task title" required>
+                        </div>
+                        <div class="mb-3">
+                            <textarea class="form-control" name="description" placeholder="Task description (optional)" rows="2"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Reminder Date (optional)</label>
+                            <input type="date" class="form-control" name="reminder_date">
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Add Task</button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Tasks List -->
+            {% if tasks %}
+                {% for task in tasks %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <h5 class="card-title {% if task.is_completed %}text-decoration-line-through text-muted{% endif %}">
+                                    {{ task.title }}
+                                </h5>
+                                {% if task.description %}
+                                <p class="card-text text-muted">{{ task.description }}</p>
+                                {% endif %}
+                                {% if task.reminder_date %}
+                                <small class="badge bg-warning">Reminder: {{ task.reminder_date }}</small>
+                                {% endif %}
+                            </div>
+                            <div class="btn-group" role="group">
+                                {% if not task.is_completed %}
+                                <a href="{{ url_for('complete_task', task_id=task.id) }}" class="btn btn-sm btn-success">Complete</a>
+                                {% endif %}
+                                <a href="{{ url_for('edit_task', task_id=task.id) }}" class="btn btn-sm btn-warning">Edit</a>
+                                <a href="{{ url_for('delete_task', task_id=task.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+            <div class="alert alert-info">No tasks yet. Create one above!</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
